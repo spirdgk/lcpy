@@ -1,0 +1,6 @@
+include INSTALLATION_INSTRUCTIONS.txt
+include requirements.txt
+include README.md
+include LICENSE
+recursive-include examples *
+recursive-include lcpy/cython_files *.pyx *.pxd *.c

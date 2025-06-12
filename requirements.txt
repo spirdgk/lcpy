@@ -1,0 +1,6 @@
+Cython==3.0.12
+matplotlib==3.10.1
+numpy==1.26.4
+pandas==2.2.3
+seaborn==0.13.2
+XlsxWriter==3.2.3
