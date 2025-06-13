@@ -40,6 +40,7 @@ The steps to utilize LcPy for LCC/TEA analysis are
 ## Installation
 
 LcPy is under active development and can be installed by cloning the repository or via
+
 pip install git+https://github.com/spirdgk/lcpy.git
 
 ## Examples
