@@ -1,7 +1,6 @@
 import numpy as np
 import sys
 import importlib
-# from ./.parameters.global_parameters import bw_project, bw_database, bw_biosphere, bw_ecoinvent
 import multiprocessing
 import random
 import os
