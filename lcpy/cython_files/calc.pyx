@@ -1,30 +1,21 @@
 import numpy as np # katevazoume nunmpy
 cimport numpy as cnp # katevazoume c-level API to numpy pou afinei na kanoume define types np.arrays
 
-# kanoume define oti to exchange amounts einai list
-# kanoume define to unit_impacts sa list
-# Improve performance: pass exchnage costs as array instead of pyhton list --> Reduce overheard
-# use decorators @cython.boundscheck(False), @cython.wraparound(False)
-# Further optimize by using openMP and prange
-# Use typed memory views e.g.: cdef double[:,:,:,:] result_groups = np.random.rand(num_processes, num_impacts, scenarios, time_steps)
 def impact_calculation_static_lcia(list exchange_amounts, cnp.ndarray[cnp.float64_t, ndim=2] unit_impacts):
-    # Kanoume define local variables
-    # cdef is used to define Cython variables: static typing --> grigoroi ypologismoi
+
     cdef int num_processes = len(exchange_amounts) # Processes gia ypologismo (sub-sub-processes stin sub-process) i unit_impacts.shape[0]
     cdef int scenarios = exchange_amounts[0].shape[0] # Scenaria
     cdef int time_steps = exchange_amounts[0].shape[1] # time steps
     cdef int num_impacts = unit_impacts.shape[1] # impact categories
 
-    # cdef cnp.ndarray[cnp.float64_t, ndim=2] amount_array = exchange_amounts[k]
-    #Define tous pinakes me ta apotelesmata
-    #Ana process
+
     cdef cnp.ndarray[cnp.float64_t, ndim=4] result_groups = np.zeros((num_processes, num_impacts, scenarios, time_steps), dtype = np.float64)
-    #Olika
+
     cdef cnp.ndarray[cnp.float64_t, ndim=3] final_result = np.zeros((num_impacts, scenarios, time_steps), dtype = np.float64)
 
-    # Ypologismos ana process
+
     cdef int k, i, j, t
-    # cdef list unit_list
+
     cdef cnp.ndarray[cnp.float64_t, ndim=2] amount_array
     cdef cnp.float64_t temp
 
@@ -63,7 +54,7 @@ def impact_calculation_only_scenarios(list exchange_amounts, list unit_impacts):
     cdef cnp.ndarray[cnp.float64_t, ndim = 2] exchange_amount
     cdef cnp.ndarray[cnp.float64_t, ndim = 3] unit_impact
 
-    # ksekiname gia tis prwtes num_p_infr processes
+
     for n in range(num_p):  # gia kathe infrastructural sub-process (e.g., 1-5)
         exchange_amount = exchange_amounts[n]  # travaw ta scales tis infrastructural sub-process. Dim: (scenarios, construction_years)
         unit_impact = unit_impacts[n]  # travaw ta unit impacts ths infrastructural sub-process. Dim (impact categories, scenarios, construction_years)
@@ -72,19 +63,15 @@ def impact_calculation_only_scenarios(list exchange_amounts, list unit_impacts):
             for s in range(scenarios):
                 for t in range(time_steps):
                     product = unit_impact[c, s, t] * exchange_amount[s, t]  #ypologizw to impact stin catigoria c pou skaei sto
-                    #construction year t sto senario s by multiplying the unit impact with the scale
+
                     sum_array[c, s, t] += product  # apothikevw to impact se kathe catigoria kai kathe construction_year kai senario
-                    # kai prosthetw ana infrastructural sub-process gia na exw total infrastructure impact
+
                     contributions_array[n, c, s, t] = product  # apothikevw per infrastructural sub-process
-                    #kane to idio kai gia tous infrastructure specific pinakes
+
 
     return sum_array, contributions_array
 
 
-# Improve performance: pass exchnage costs as array instead of pyhton list --> Reduce overheard
-# use decorators @cython.boundscheck(False), @cython.wraparound(False)
-# Further optimize by using openMP and prange
-# Use typed memory views e.g.: cdef double[:,:,:,:] result_groups = np.random.rand(num_processes, num_impacts, scenarios, time_steps)
 def impact_calculation_total_test2(list exchange_amounts, list unit_impacts, list unit_impacts_infr, cnp.int con_years):
 
     cdef int num_p = len(unit_impacts) # number of operational sub-processes
@@ -111,19 +98,19 @@ def impact_calculation_total_test2(list exchange_amounts, list unit_impacts, lis
     cdef cnp.ndarray[cnp.float64_t, ndim = 2] exchange_amount
     cdef cnp.ndarray[cnp.float64_t, ndim = 3] unit_impact
 
-    # ksekiname gia tis prwtes num_p_infr processes
-    for n in range(num_p_infr): # gia kathe infrastructural sub-process (e.g., 1-5)
-        exchange_amount = exchange_amounts[n] # travaw ta scales tis infrastructural sub-process. Dim: (scenarios, construction_years)
-        unit_impact = unit_impacts_infr[n] # travaw ta unit impacts ths infrastructural sub-process. Dim (impact categories, scenarios, construction_years)
+
+    for n in range(num_p_infr): 
+        exchange_amount = exchange_amounts[n]
+        unit_impact = unit_impacts_infr[n] 
 
         for c in range(categories):
             for s in range(scenarios):
                 for t in range(con_years):
-                    product = unit_impact[c, s, t] * exchange_amount[s, t] #ypologizw to impact stin catigoria c pou skaei sto
-                                                                        #construction year t sto senario s by multiplying the unit impact with the scale
-                    sum_array[c, s, t] += product # apothikevw to impact se kathe catigoria kai kathe construction_year kai senario
-                                                  # kai prosthetw ana infrastructural sub-process gia na exw total infrastructure impact
-                    contributions_array[n, c, s, t] = product # apothikevw per infrastructural sub-process
+                    product = unit_impact[c, s, t] * exchange_amount[s, t]
+  
+                    sum_array[c, s, t] += product 
+  
+                    contributions_array[n, c, s, t] = product
                     #kane to idio kai gia tous infrastructure specific pinakes
                     sum_array_infr[c, s, t] += product
                     contributions_array_infr[n, c, s, t] = product
@@ -192,25 +179,21 @@ def calculate_total_fu_per_scenario(list total_fu):
 
     return result_groups
 
-# Impove performance: pass exchnage costs as array instead of pyhton list --> Reduce overheard
-# use decorators @cython.boundscheck(False), @cython.wraparound(False)
+
 def cost_calculation_time_series(list exchange_costs, cnp.ndarray[cnp.float64_t, ndim=1] discount_rates, cnp.float64_t sign, infrastructure = False):
-    # Kanoume define local variables
-    # cdef is used to define Cython variables: static typing --> grigoroi ypologismoi
+
     cdef int num_processes = len(exchange_costs) # Processes gia ypologismo
     cdef int scenarios = exchange_costs[0].shape[0] # Scenaria
     cdef int time_steps = exchange_costs[0].shape[1] # time steps
 
-    # cdef cnp.ndarray[cnp.float64_t, ndim=2] amount_array = exchange_amounts[k]
-    #Define tous pinakes me ta apotelesmata
-    #Ana process
+
     cdef cnp.ndarray[cnp.float64_t, ndim=3] result_groups = np.zeros((num_processes, scenarios, time_steps), dtype = np.float64)
-    #Olika
+
     cdef cnp.ndarray[cnp.float64_t, ndim=2] final_result = np.zeros((scenarios, time_steps), dtype = np.float64)
 
-    # Ypologismos ana process
+
     cdef int k, i, j, t
-    # cdef list unit_list
+
     cdef cnp.ndarray[cnp.float64_t, ndim=2] amount_array
 
     if infrastructure:
@@ -229,7 +212,7 @@ def cost_calculation_time_series(list exchange_costs, cnp.ndarray[cnp.float64_t,
             for j in range(scenarios): # gia kathe scenario
                 for t in range(time_steps): # kai se kathe time-step
                     result_groups[k,j,t] = discount_rates[t] * amount_array[j,t] * sign #pollaplasiazoume to cost gia tin katigoria me to exchange amount
-                    # se kathe time-step kai scenario, meion giati einai kostos
+
 
     #twra pame na summaroume ana process
     for j in range(scenarios):
@@ -239,9 +222,7 @@ def cost_calculation_time_series(list exchange_costs, cnp.ndarray[cnp.float64_t,
 
     return result_groups, final_result
 
-# Impove performance: pass exchnage costs as array instead of pyhton list --> Reduce overheard
-# use decorators @cython.boundscheck(False), @cython.wraparound(False)
-# Further optimize by using openMP and prange
+
 def npv_calculation(list processes_costs, list processes_revenues, list infrastructure_cost, cnp.int con_years, cnp.ndarray[cnp.float64_t, ndim = 1] discount_rates):
 
     cdef int num_processes = len(processes_costs)  # Operational processes kostous
@@ -252,14 +233,14 @@ def npv_calculation(list processes_costs, list processes_revenues, list infrastr
     cdef int num_con_years = infrastructure_cost[0].shape[1] # xronia kataskevis
     cdef int num_processes_infr = len(infrastructure_cost) # processes kataskavis
 
-    # Pinakes me results
+
     cdef cnp.ndarray[cnp.float64_t, ndim = 1] operational_costs = np.zeros((scenarios), dtype = np.float64)
     cdef cnp.ndarray[cnp.float64_t, ndim = 1] infr_costs = np.zeros((scenarios), dtype=np.float64)
     cdef cnp.ndarray[cnp.float64_t, ndim = 1] total_costs = np.zeros((scenarios), dtype=np.float64)
     cdef cnp.ndarray[cnp.float64_t, ndim = 1] total_revenue = np.zeros((scenarios), dtype=np.float64)
     cdef cnp.ndarray[cnp.float64_t, ndim = 1] npv = np.zeros((scenarios), dtype=np.float64)
 
-    #Intermediate pinakes kai integers
+
     cdef cnp.ndarray[cnp.float64_t, ndim=2] cost_amount_array
     cdef cnp.ndarray[cnp.float64_t, ndim=2] infr_cost_amount_array
     cdef cnp.ndarray[cnp.float64_t, ndim=2] rev_amount_array
@@ -295,16 +276,13 @@ def npv_calculation(list processes_costs, list processes_revenues, list infrastr
     return npv, total_costs, operational_costs, total_revenue
 
 
-# Impove performance: pass exchnage costs as array instead of pyhton list --> Reduce overheard
-# use decorators @cython.boundscheck(False), @cython.wraparound(False)
-# Further optimize by using openMP and prange
 def total_cost_per_time_step(list cost_list, cnp.ndarray[cnp.float64_t, ndim=1] discount_rates, cnp.float64_t sign, cnp.int add_disc):
 
     cdef int num_processes = len(cost_list)
     cdef int scenarios = cost_list[0].shape[0]
     cdef int time_steps = cost_list[0].shape[1]
 
-    # Define output arrays with appropriate shapes and types
+
     cdef cnp.ndarray[cnp.float64_t, ndim=2] non_cumulative_sum = np.zeros((scenarios, time_steps), dtype=np.float64)
     cdef cnp.ndarray[cnp.float64_t, ndim=3] non_cumulative_sum_per_process = np.zeros((scenarios, time_steps, num_processes), dtype=np.float64)
     cdef cnp.ndarray[cnp.float64_t, ndim=2] cumulative_sum = np.zeros((scenarios, time_steps), dtype=np.float64)
@@ -317,7 +295,7 @@ def total_cost_per_time_step(list cost_list, cnp.ndarray[cnp.float64_t, ndim=1] 
     cdef cnp.float64_t rate = discount_rates[add_disc]
 
     if add_disc == 0:
-    # Calculate non_cumulative_sum and non_cumulative_sum_per_process
+
         for k in range(num_processes):
             no_k_cost = cost_list[k]
             for i in range(scenarios):
@@ -327,7 +305,7 @@ def total_cost_per_time_step(list cost_list, cnp.ndarray[cnp.float64_t, ndim=1] 
                     non_cumulative_sum[i, j] += cost_to_add
                     non_cumulative_sum_per_process[i, j, k] = cost_to_add
     else:
-        # Calculate non_cumulative_sum and non_cumulative_sum_per_process
+
         for k in range(num_processes):
             no_k_cost = cost_list[k]
             for i in range(scenarios):
@@ -337,13 +315,13 @@ def total_cost_per_time_step(list cost_list, cnp.ndarray[cnp.float64_t, ndim=1] 
                     non_cumulative_sum[i, j] += cost_to_add
                     non_cumulative_sum_per_process[i, j, k] = cost_to_add
 
-        # Calculate cumulative_sum
+
     for i in range(scenarios):
         cumulative_sum[i,0] = non_cumulative_sum[i,0]
         for j in range(1,time_steps):
             cumulative_sum[i, j] = cumulative_sum[i, j - 1] + non_cumulative_sum[i, j]
 
-    # Calculate cumulative_sum_per_process
+
     for k in range(num_processes):
         for i in range(scenarios):
             cumulative_sum_per_process[i, 0, k] = non_cumulative_sum_per_process[i, 0, k]
@@ -352,24 +330,22 @@ def total_cost_per_time_step(list cost_list, cnp.ndarray[cnp.float64_t, ndim=1] 
 
     return non_cumulative_sum, non_cumulative_sum_per_process, cumulative_sum, cumulative_sum_per_process
 
-# Impove performance: pass exchnage costs as array instead of pyhton list --> Reduce overheard
-# use decorators @cython.boundscheck(False), @cython.wraparound(False)
-# Further optimize by using openMP and prange
+
 def total_cost_per_time_step_time_infrastructure_included(list cost_list, list infr_cost_list, cnp.ndarray[cnp.float64_t, ndim=1] discount_rates):
 
     cdef int num_processes = len(cost_list)
     cdef int scenarios = cost_list[0].shape[0]
     cdef int time_steps = cost_list[0].shape[1]
 
-    # Diavazoume to poses construction processes yparxoun kai posa einai ta xronia
+
     cdef int num_con_processes = len(infr_cost_list)
     cdef int num_con_years = infr_cost_list[0].shape[1]
 
-    # Total xronia, total processes (operational kai construction)
+
     cdef int total_years = num_con_years + time_steps
     cdef int total_processes = num_processes + num_con_processes
 
-    # Define output arrays with appropriate shapes and types
+
     cdef cnp.ndarray[cnp.float64_t, ndim=2] non_cumulative_sum = np.zeros((scenarios, total_years), dtype=np.float64)
     cdef cnp.ndarray[cnp.float64_t, ndim=3] non_cumulative_sum_per_process = np.zeros((scenarios, total_years, total_processes),
                                                                                       dtype=np.float64)
@@ -382,9 +358,7 @@ def total_cost_per_time_step_time_infrastructure_included(list cost_list, list i
     cdef cnp.ndarray[cnp.float64_t, ndim=2] step0_cost
     cdef cnp.float64_t cost_value
 
-    # Edw to kanw gia ta construction processes kai construction years
-    # Opote edw exeis gemisei tous pinakes gia kathe construction process kai ws to prwto construction year gia kathe scenario
-    # kai kanies kai discounting sto prwto construction year
+
     for k in range(num_con_processes):
         step0_cost = infr_cost_list[k]
         for i in range(scenarios):
@@ -393,9 +367,7 @@ def total_cost_per_time_step_time_infrastructure_included(list cost_list, list i
                 non_cumulative_sum[i, j] += cost_value
                 non_cumulative_sum_per_process[i, j, k] = cost_value
 
-    # Edw to kanw gia ta operational processes kai operational years
-    # Opote edw exeis gemisei tous pinakes gia kathe process kai gia kathe scenario
-    # kai kanies kai discounting sto prwto construction year (*discount_rates[num_con_years]) giati afta itan discounted sto prwto opeational year
+
     for k in range(num_processes):
         no_k_cost = cost_list[k]
         for i in range(scenarios):
@@ -404,13 +376,13 @@ def total_cost_per_time_step_time_infrastructure_included(list cost_list, list i
                 non_cumulative_sum[i, j] += cost_value
                 non_cumulative_sum_per_process[i, j, num_con_processes + k] = cost_value
 
-    # Calculate cumulative_sum
+
     for i in range(scenarios):
         cumulative_sum[i,0] = non_cumulative_sum[i,0]
         for j in range(1,total_years):
             cumulative_sum[i, j] = cumulative_sum[i, j - 1] + non_cumulative_sum[i, j]
 
-    # Calculate cumulative_sum_per_process
+
     for k in range(total_processes):
         for i in range(scenarios):
             cumulative_sum_per_process[i, 0, k] = non_cumulative_sum_per_process[i, 0, k]
@@ -421,9 +393,7 @@ def total_cost_per_time_step_time_infrastructure_included(list cost_list, list i
     return non_cumulative_sum, non_cumulative_sum_per_process, cumulative_sum, cumulative_sum_per_process
 
 
-# Impove performance: pass exchnage costs as array instead of pyhton list --> Reduce overheard
-# use decorators @cython.boundscheck(False), @cython.wraparound(False)
-# Further optimize by using openMP and prange
+
 def lcoe_calculation(list amounts_lists, cnp.ndarray[cnp.float64_t, ndim=1] cumulative_costs, cnp.ndarray[cnp.float64_t, ndim = 1] discount_rate, cnp.int con_years):
 
     cdef int scenarios = amounts_lists[0].shape[0]
@@ -450,9 +420,7 @@ def lcoe_calculation(list amounts_lists, cnp.ndarray[cnp.float64_t, ndim=1] cumu
     return lcoe
 
 
-# Impove performance: pass exchnage costs as array instead of pyhton list --> Reduce overheard
-# use decorators @cython.boundscheck(False), @cython.wraparound(False)
-# Further optimize by using openMP and prange
+
 def lcoe_calculation_in_time(list amounts_lists, cnp.ndarray[cnp.float64_t, ndim=2] cumulative_costs, cnp.ndarray[cnp.float64_t, ndim = 1] discount_rate, cnp.int con_years):
 
     cdef int scenarios = amounts_lists[0].shape[0]
@@ -482,7 +450,7 @@ def lcoe_calculation_in_time(list amounts_lists, cnp.ndarray[cnp.float64_t, ndim
 
     return lcoe_in_time
 
-#total_impact: array of dimensions: (Impact categories, scenarios, construction_years + time_steps = total_years)
+
 def calculation_of_the_in_time_impact_evolution_absolute(cnp.ndarray[cnp.float64_t, ndim=3] impact):
 
     cdef int ncat = impact.shape[0]
@@ -548,23 +516,20 @@ def cum_calculation_of_the_in_time_impact_evolution_per_fu(cnp.ndarray[cnp.float
 
 
 def emissions_calculation_in_time(list exchange_amounts, list emission_amounts):
-    # Kanoume define local variables
-    # cdef is used to define Cython variables: static typing --> grigoroi ypologismoi
+
     cdef int num_processes = len(exchange_amounts) # Processes gia ypologismo (sub-sub-processes stin sub-process) i unit_impacts.shape[0]
     cdef int scenarios = exchange_amounts[0].shape[0] # Scenaria
     cdef int time_steps = exchange_amounts[0].shape[1] # time steps
     cdef int num_flows = emission_amounts[0].shape[0] # flows
 
-    # cdef cnp.ndarray[cnp.float64_t, ndim=2] amount_array = exchange_amounts[k]
-    #Define tous pinakes me ta apotelesmata
-    #Ana process
+
     cdef cnp.ndarray[cnp.float64_t, ndim=4] result_groups = np.zeros((num_processes, num_flows, scenarios, time_steps), dtype = np.float64)
-    #Olika
+
     cdef cnp.ndarray[cnp.float64_t, ndim=3] final_result = np.zeros((num_flows, scenarios, time_steps), dtype = np.float64)
 
-    # Ypologismos ana process
+
     cdef int k, i, j, t
-    # cdef list unit_list
+
     cdef cnp.ndarray[cnp.float64_t, ndim=2] amount_array
     cdef cnp.ndarray[cnp.float64_t, ndim=2] amount_flows
     cdef cnp.float64_t temp
@@ -579,7 +544,7 @@ def emissions_calculation_in_time(list exchange_amounts, list emission_amounts):
                 for t in range(time_steps): # kai se kathe time-step
                     result_groups[k,i,j,t] = temp * amount_array[j,t] #pollaplasiazoume to unit_impact gia tin katigoria me to exchange amount se kathe time-step kai scenario
 
-    #twra pame na summaroume ana process
+
     for k in range(num_processes):
         for i in range(num_flows):
                 for j in range(scenarios):
@@ -591,19 +556,16 @@ def emissions_calculation_in_time(list exchange_amounts, list emission_amounts):
 
 
 def characterized_inventory_calculation_in_time(list exchange_amounts, list emission_amounts):
-    # Kanoume define local variables
-    # cdef is used to define Cython variables: static typing --> grigoroi ypologismoi
+
     cdef int num_processes = len(exchange_amounts) # Processes gia ypologismo (sub-sub-processes stin sub-process) i len(emission_amounts)
     cdef int scenarios = exchange_amounts[0].shape[0] # Scenaria
     cdef int time_steps = exchange_amounts[0].shape[1] # time steps
     cdef int num_cat = len(emission_amounts[0]) # categories
     cdef int num_flows = emission_amounts[0][0].shape[0]
 
-    # cdef cnp.ndarray[cnp.float64_t, ndim=2] amount_array = exchange_amounts[k]
-    #Define tous pinakes me ta apotelesmata
-    #Ana process
+
     cdef cnp.ndarray[cnp.float64_t, ndim=5] result_groups = np.zeros((num_processes, num_cat, num_flows, scenarios, time_steps), dtype = np.float64)
-    #Olika
+
     cdef cnp.ndarray[cnp.float64_t, ndim=4] final_result = np.zeros((num_cat, num_flows, scenarios, time_steps), dtype = np.float64)
 
     # Ypologismos ana process
@@ -625,7 +587,7 @@ def characterized_inventory_calculation_in_time(list exchange_amounts, list emis
                     for t in range(time_steps): # kai se kathe time-step
                         result_groups[k,c,i,j,t] = temp * amount_array[j,t] #pollaplasiazoume to unit_impact gia tin katigoria me to exchange amount se kathe time-step kai scenario
 
-    #twra pame na summaroume ana process
+
     for k in range(num_processes):
         for c in range(num_cat):
             for i in range(num_flows):
@@ -662,7 +624,7 @@ def emissions_calculation_in_time_total_test2(list exchange_amounts, list unit_i
     cdef cnp.ndarray[cnp.float64_t, ndim = 2] exchange_amount
     cdef cnp.ndarray[cnp.float64_t, ndim = 3] unit_impact
 
-    # ksekiname gia tis prwtes num_p_infr processes
+
     for n in range(num_p_infr): # gia kathe infrastructural sub-process (e.g., 1-5)
         exchange_amount = exchange_amounts[n] # travaw ta scales tis infrastructural sub-process. Dim: (scenarios, construction_years)
         unit_impact = unit_impacts_infr[n] # travaw ta unit impacts ths infrastructural sub-process. Dim (flows, scenarios, construction_years)
@@ -670,16 +632,16 @@ def emissions_calculation_in_time_total_test2(list exchange_amounts, list unit_i
         for c in range(flows):
             for s in range(scenarios):
                 for t in range(con_years):
-                    product = unit_impact[c, s, t] * exchange_amount[s, t] #ypologizw to flow pou ginetai intervene sto
-                                                                        #construction year t sto senario s by multiplying the unit intervention with the scale
-                    sum_array[c, s, t] += product # apothikevw to intervention gia kathe flow kai kathe construction_year kai senario
-                                                  # kai prosthetw ana infrastructural sub-process gia na exw total infrastructure impact
-                    contributions_array[n, c, s, t] = product # apothikevw per infrastructural sub-process
-                    #kane to idio kai gia tous infrastructure specific pinakes
+                    product = unit_impact[c, s, t] * exchange_amount[s, t]
+
+                    sum_array[c, s, t] += product 
+
+                    contributions_array[n, c, s, t] = product 
+
                     sum_array_infr[c, s, t] += product
                     contributions_array_infr[n, c, s, t] = product
 
-    # sinexizoume gia tis operational sub-processes num_p me tin idia logiki opws panw
+
     for n in range(num_p_infr, total_processes):
         exchange_amount = exchange_amounts[n]
         unit_impact = unit_impacts[n - num_p_infr]
@@ -696,13 +658,7 @@ def emissions_calculation_in_time_total_test2(list exchange_amounts, list unit_i
 
     return sum_array, contributions_array, sum_array_infr, contributions_array_infr, sum_array_op, contributions_array_op
 
-# no_i_char_inventory: (Arithmos Categories, Arithmos flows, scenarios, time_steps)
-# infr_char_inventory: (Arithmos Categories, Arithmos flows, scenarios, construction_years)
-# to total_exchanges_amounts_np einai mia lista pou mesa exei numpy arrays gia elements.
-# Exei sinoliko arithmo elements = # of infrastructure sub-processes + # of operational sub-processes
-# Kathe numpy array kanei correspond se mia sub-process kai exei ta scales gia to total process se kathe scenario kai xrono.
-# Gia ta infrastructure processes oi pinakes einai of dimension (scenarios, construction_years)
-# Gia ta operational processes oi pinakes einai of dimension (scenarios, time_steps)
+
 def characterized_inventory_calculation_in_time_total_test2(list exchange_amounts, list unit_char_inv,
                                                             list unit_char_inv_infr, cnp.int con_years):
 
@@ -730,7 +686,7 @@ def characterized_inventory_calculation_in_time_total_test2(list exchange_amount
     cdef cnp.ndarray[cnp.float64_t, ndim = 2] exchange_amount
     cdef cnp.ndarray[cnp.float64_t, ndim = 4] unit_c_inv
 
-    # ksekiname gia tis prwtes num_p_infr processes
+
     for n in range(num_p_infr):  # gia kathe infrastructural sub-process (e.g., 1-5)
 
         exchange_amount = exchange_amounts[n]  # travaw ta scales tis infrastructural sub-process. Dim: (scenarios, construction_years)
@@ -740,16 +696,15 @@ def characterized_inventory_calculation_in_time_total_test2(list exchange_amount
             for f in range(flows):
                 for s in range(scenarios):
                     for t in range(con_years):
-                        product = unit_c_inv[c, f, s, t] * exchange_amount[s, t]  #ypologizw to flow pou ginetai intervene sto
-                        #construction year t sto senario s by multiplying the unit intervention with the scale
-                        sum_array[c, f, s, t] += product  # apothikevw to intervention gia kathe flow kai kathe construction_year kai senario
-                        # kai prosthetw ana infrastructural sub-process gia na exw total infrastructure impact
-                        contributions_array[n, c, f, s, t] = product  # apothikevw per infrastructural sub-process
-                        #kane to idio kai gia tous infrastructure specific pinakes
+                        product = unit_c_inv[c, f, s, t] * exchange_amount[s, t]  
+
+                        sum_array[c, f, s, t] += product  
+     
+                        contributions_array[n, c, f, s, t] = product  
+ 
                         sum_array_infr[c, f, s, t] += product
                         contributions_array_infr[n, c, f, s, t] = product
 
-        # sinexizoume gia tis operational sub-processes num_p me tin idia logiki opws panw
     for n in range(num_p_infr, total_processes):
         exchange_amount = exchange_amounts[n]
         unit_c_inv = unit_char_inv[n - num_p_infr]
@@ -872,18 +827,6 @@ def cum_calculation_of_the_in_time_impact_evolution_per_fu_no_construction(cnp.n
 
     cdef int k, j, i
 
-    # for k in range(ncat):
-    #     for j in range(nscen):
-    #
-    #         cumulative_impact_per_fu[k,j,0] = impact[k,j,0]
-    #
-    #         for i in range(ntime):
-    #             if i == 0:
-    #                 pass
-    #             else:
-    #                 cumulative_impact_per_fu[k, j, i] =  impact[k,j,i] + cumulative_impact_per_fu[k, j, i - 1]
-    #
-
     for k in range(ncat):
         for j in range(nscen):
 
@@ -899,11 +842,6 @@ def cum_calculation_of_the_in_time_impact_evolution_per_fu_no_construction(cnp.n
     return cumulative_impact_per_fu, cumulative_fu
 
 
-
-# Improve performance: pass exchnage costs as array instead of pyhton list --> Reduce overheard
-# use decorators @cython.boundscheck(False), @cython.wraparound(False)
-# Further optimize by using openMP and prange
-# Use typed memory views e.g.: cdef double[:,:,:,:] result_groups = np.random.rand(num_processes, num_impacts, scenarios, time_steps)
 def impact_calculation_total_test2_no_contrs_ability(list exchange_amounts, list unit_impacts, list unit_impacts_infr, cnp.int con_years):
 
     cdef int num_p = len(unit_impacts) # number of operational sub-processes
@@ -933,24 +871,23 @@ def impact_calculation_total_test2_no_contrs_ability(list exchange_amounts, list
 
     if con_years != 0  and len(unit_impacts_infr) != 0:
 
-        # ksekiname gia tis prwtes num_p_infr processes
-        for n in range(num_p_infr): # gia kathe infrastructural sub-process (e.g., 1-5)
-            exchange_amount = exchange_amounts[n] # travaw ta scales tis infrastructural sub-process. Dim: (scenarios, construction_years)
-            unit_impact = unit_impacts_infr[n] # travaw ta unit impacts ths infrastructural sub-process. Dim (impact categories, scenarios, construction_years)
+        for n in range(num_p_infr):
+            exchange_amount = exchange_amounts[n] 
+            unit_impact = unit_impacts_infr[n] 
 
             for c in range(categories):
                 for s in range(scenarios):
                     for t in range(con_years):
-                        product = unit_impact[c, s, t] * exchange_amount[s, t] #ypologizw to impact stin catigoria c pou skaei sto
-                                                                            #construction year t sto senario s by multiplying the unit impact with the scale
-                        sum_array[c, s, t] += product # apothikevw to impact se kathe catigoria kai kathe construction_year kai senario
-                                                      # kai prosthetw ana infrastructural sub-process gia na exw total infrastructure impact
-                        contributions_array[n, c, s, t] = product # apothikevw per infrastructural sub-process
+                        product = unit_impact[c, s, t] * exchange_amount[s, t] 
+
+                        sum_array[c, s, t] += product
+
+                        contributions_array[n, c, s, t] = product
                         #kane to idio kai gia tous infrastructure specific pinakes
                         sum_array_infr[c, s, t] += product
                         contributions_array_infr[n, c, s, t] = product
 
-        # sinexizoume gia tis operational sub-processes num_p me tin idia logiki opws panw
+
         for n in range(num_p_infr, total_processes):
             exchange_amount = exchange_amounts[n]
             unit_impact = unit_impacts[n - num_p_infr]
@@ -966,7 +903,7 @@ def impact_calculation_total_test2_no_contrs_ability(list exchange_amounts, list
                         contributions_array_op[n - num_p_infr, c, s, t - con_years] = product
     else:
 
-        # sinexizoume gia tis operational sub-processes num_p me tin idia logiki opws panw
+
         for n in range(num_p_infr, total_processes):
             exchange_amount = exchange_amounts[n]
             unit_impact = unit_impacts[n - num_p_infr]
@@ -977,8 +914,6 @@ def impact_calculation_total_test2_no_contrs_ability(list exchange_amounts, list
                         product = unit_impact[c, s, t - con_years] * exchange_amount[s, t - con_years]
                         sum_array[c, s, t] += product
                         contributions_array[n, c, s, t] = product
-                        # sum_array_op[c, s, t - con_years] += product
-                        # contributions_array_op[n - num_p_infr, c, s, t - con_years] = product
 
     return sum_array, contributions_array, sum_array_infr, contributions_array_infr, sum_array_op, contributions_array_op
 
@@ -1332,19 +1267,16 @@ def process_to_sub_process_one_ssp(list list_with_exchanges):
 
 
 def emissions_calculation_simple_lca(list exchange_amounts, list emission_amounts):
-    # Kanoume define local variables
-    # cdef is used to define Cython variables: static typing --> grigoroi ypologismoi
+
     cdef int num_processes = len(exchange_amounts) # Processes gia ypologismo (sub-sub-processes stin sub-process) i unit_impacts.shape[0]
     cdef int num_flows = emission_amounts[0].shape[0] # flows
 
-    # cdef cnp.ndarray[cnp.float64_t, ndim=2] amount_array = exchange_amounts[k]
-    #Define tous pinakes me ta apotelesmata
-    #Ana process
+
     cdef cnp.ndarray[cnp.float64_t, ndim=2] result_groups = np.zeros((num_processes, num_flows), dtype = np.float64)
-    #Olika
+
     cdef cnp.ndarray[cnp.float64_t, ndim=1] final_result = np.zeros((num_flows), dtype = np.float64)
 
-    # Ypologismos ana process
+
     cdef int k, i
     cdef cnp.float64_t temp, amount_array
     cdef cnp.ndarray[cnp.float64_t, ndim=2] amount_flows
@@ -1357,7 +1289,7 @@ def emissions_calculation_simple_lca(list exchange_amounts, list emission_amount
             temp = amount_flows[i,0]
             result_groups[k,i] = temp * amount_array #pollaplasiazoume to unit_impact gia tin katigoria me to exchange amount se kathe time-step kai scenario
 
-    #twra pame na summaroume ana process
+
     for k in range(num_processes):
         for i in range(num_flows):
             final_result[i] += result_groups[k,i]
@@ -1366,22 +1298,18 @@ def emissions_calculation_simple_lca(list exchange_amounts, list emission_amount
 
 
 def characterized_inventory_calculation_simple_lca(list exchange_amounts, list emission_amounts):
-    # Kanoume define local variables
-    # cdef is used to define Cython variables: static typing --> grigoroi ypologismoi
+
     cdef int num_processes = len(exchange_amounts) # Processes gia ypologismo (sub-sub-processes stin sub-process) i len(emission_amounts)
     cdef int num_cat = len(emission_amounts[0]) # categories
     cdef int num_flows = emission_amounts[0][0].shape[0]
 
-    # cdef cnp.ndarray[cnp.float64_t, ndim=2] amount_array = exchange_amounts[k]
-    #Define tous pinakes me ta apotelesmata
-    #Ana process
     cdef cnp.ndarray[cnp.float64_t, ndim=3] result_groups = np.zeros((num_processes, num_cat, num_flows), dtype = np.float64)
-    #Olika
+
     cdef cnp.ndarray[cnp.float64_t, ndim=2] final_result = np.zeros((num_cat, num_flows), dtype = np.float64)
 
-    # Ypologismos ana process
+
     cdef int c, k, i
-    # cdef list unit_list
+
     cdef cnp.ndarray[cnp.float64_t, ndim=2] amount_flows
     cdef cnp.float64_t temp, amount_array
 
@@ -1395,7 +1323,6 @@ def characterized_inventory_calculation_simple_lca(list exchange_amounts, list e
                 temp = amount_flows[i,0]
                 result_groups[k,c,i] = temp * amount_array #pollaplasiazoume to unit_impact gia tin katigoria me to exchange amount se kathe time-step kai scenario
 
-    #twra pame na summaroume ana process
     for k in range(num_processes):
         for c in range(num_cat):
             for i in range(num_flows):
@@ -1418,7 +1345,7 @@ def emissions_calculation_total_simple_lca(list exchange_amounts, list unit_impa
     cdef double product, exchange_amount
     cdef cnp.ndarray[cnp.float64_t, ndim = 1] unit_impact
 
-    # sinexizoume gia tis operational sub-processes num_p me tin idia logiki opws panw
+
     for n in range(total_processes):
         exchange_amount = exchange_amounts[n]
         unit_impact = unit_impacts[n]
