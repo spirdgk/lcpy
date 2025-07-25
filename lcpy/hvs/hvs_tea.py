@@ -151,6 +151,7 @@ def visualize_dataframes_time_series(dataframes, impacts, scenarios, xlabel, yla
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
         plt.legend(title="Scenarios")
+        plt.tight_layout()
 
         if type(scenarios) == str:
             plt.savefig(f"{filepath}_{scenarios}.png")
@@ -172,6 +173,7 @@ def visualize_npv_in_time(df_rev, df_cost, scen_names, filepath, fig_size = (5,3
     plt.xlabel("Years")
     plt.ylabel("EUR")
     plt.legend(title="Scenarios")
+    plt.tight_layout()
     plt.savefig(filepath)
     plt.close()
 
@@ -240,6 +242,7 @@ def npv_results_storage_and_vis(list_values, list_names, target_dir, file_name =
         plt.figure(figsize=(6, 4))
         plt.boxplot(df[column], vert=True)
         plt.title(f"Boxplot of {column}")
+        plt.tight_layout()
         excel_file_path = os.path.join(target_dir, f"boxplot_{column}.png")
         plt.savefig(excel_file_path)
         plt.close()
