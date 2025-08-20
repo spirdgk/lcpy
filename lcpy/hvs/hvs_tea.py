@@ -225,8 +225,11 @@ def visualize_stacked_barcharts(mapping_test, cost_arrays, names_scen, step_for_
     visualize_stacked_barchart_time_series(my_dict_test[scen_to_visualize], step_for_vis, my_list, excel_file_path, yaxis_label, xaxis_label, rel)
 
 
-def npv_results_storage_and_vis(list_values, list_names, target_dir, file_name = 'boxplot_results.xlsx'):
+def npv_results_storage_and_vis(list_values, list_names, list_names_yaxis, target_dir, file_name = 'boxplot_results.xlsx'):
 
+    if len(list_names) != len(list_names_yaxis):
+        raise ValueError('list_names_yaxis and list_names must have same length')
+    
     excel_file_path = os.path.join(target_dir, file_name)
     npv_results = {}
 
@@ -237,11 +240,13 @@ def npv_results_storage_and_vis(list_values, list_names, target_dir, file_name =
     df.to_excel(excel_file_path, index=True)
     describe_path = os.path.join(target_dir, f"scenarios_describe_costs.xlsx")
     df.describe().to_excel(describe_path)
-
+    
+    k = 0
     for column in df.columns:
         plt.figure(figsize=(6, 4))
         plt.boxplot(df[column], vert=True)
-        plt.title(f"Boxplot of {column}")
+        plt.xlabel(f"{column}")
+        plt.ylabel(f"{list_names_yaxis[k]}")
         plt.tight_layout()
         excel_file_path = os.path.join(target_dir, f"boxplot_{column}.png")
         plt.savefig(excel_file_path)
