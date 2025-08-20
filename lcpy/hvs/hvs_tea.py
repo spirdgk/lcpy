@@ -251,6 +251,7 @@ def npv_results_storage_and_vis(list_values, list_names, list_names_yaxis, targe
         excel_file_path = os.path.join(target_dir, f"boxplot_{column}.png")
         plt.savefig(excel_file_path)
         plt.close()
+        k+=1
 
 
 def create_dictionary_with_dfs(mapping_dict, cost_dict, scenario_index, name):
