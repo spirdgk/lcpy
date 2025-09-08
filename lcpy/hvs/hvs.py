@@ -39,7 +39,11 @@ def create_name_dictionaries(mapping_dict, key_list):
     return dict(zip(list(mapping_dict.keys()), [list(dictionary.keys()) for dictionary in key_list]))
 
 
-def plot_stacked_percentage_barchart_seaborn(df, filepath, figsize, dpi, verbose = 'True', tab = "tab10", xlabel="Categories", ylabel="Contribution (%)"):
+def plot_stacked_percentage_barchart_seaborn(df, filepath, figsize, dpi,
+                                             label_size = 14,
+                                             tick_size = 14,
+                                             verbose = 'True', tab = "tab10", 
+                                             xlabel="Categories", ylabel="Contribution (%)"):
     """
     Plots a stacked percentage bar chart using Seaborn where each column sums to 100%.
 
@@ -69,9 +73,9 @@ def plot_stacked_percentage_barchart_seaborn(df, filepath, figsize, dpi, verbose
 
     # Labels and Formatting
     # ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
+    ax.set_ylabel(ylabel, fontsize=label_size)
     ax.grid(False)
-    ax.tick_params(axis='both', labelsize=6)
+    ax.tick_params(axis='both', labelsize=tick_size)
     ax.set_ylim(0, 100)  # Ensures each bar sums to 100%
     ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left", fontsize = '6')  # Move legend outside
     plt.xticks()  # Rotate labels for readability
