@@ -527,7 +527,8 @@ def plot_stacked_percentage_bar_sub_processes(data_dict, key, filepath, figsize 
         plt.close(fig)
 
 
-def plot_stacked_percentage_bar_grid(data_dict, keys, filepath, figsize=(15, 12), dpi=600, top_x=5, xlabel="Processes", ylabel="Contribution (%)"):
+def plot_stacked_percentage_bar_grid(data_dict, keys, filepath, figsize=(15, 12), dpi=600, top_x=5, ylabel="Processes", 
+                                     xlabel="Contribution (%)", label_fontsize=14, tick_fontsize=14, title_fontsize=16):
     """
     Creates a 3x3 grid of stacked percentage bar charts for the given keys.
 
@@ -570,9 +571,10 @@ def plot_stacked_percentage_bar_grid(data_dict, keys, filepath, figsize=(15, 12)
         for i, v in enumerate(df_final["Percentage"]):
             ax.text(v + 1, i, f"{v:.1f}%", va='center')
 
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(ylabel)
-        ax.set_title(key)
+        ax.set_xlabel(xlabel, fontsize=label_fontsize)
+        ax.set_ylabel(ylabel, fontsize=label_fontsize)
+        ax.set_title(key, fontsize=title_fontsize)
+        ax.tick_params(axis="both", labelsize=tick_fontsize)
         ax.invert_yaxis()
 
     plt.tight_layout()
