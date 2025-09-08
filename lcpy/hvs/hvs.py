@@ -96,7 +96,9 @@ def create_dataframes_for_holistic_contribution_analysis(data):
     return pd.DataFrame({"Name": names, "Value": values})
 
 
-def store_scenario_results(df, target_dir, impact_categories_units, figsize, dpi, name = ""):
+def store_scenario_results(df, target_dir, impact_categories_units, figsize, dpi,
+                           label_size = 14, tick_size = 12, figure_type = 'png',
+                           name = ""):
     df_path = os.path.join(target_dir, "scenarios_dataframe.xlsx")
     df.to_excel(df_path, index=True)
 
@@ -109,9 +111,10 @@ def store_scenario_results(df, target_dir, impact_categories_units, figsize, dpi
 
         # Set y-axis label
         y_label = impact_categories_units[i] if i < len(impact_categories_units) else "Values"
-        plt.ylabel(y_label)
+        plt.ylabel(y_label, fontsize=label_size)
+        plt.tick_params(axis ='both', labelsize=tick_size)
 
-        boxplot_path = os.path.join(target_dir, f"boxplot_{column}_{name}.png")
+        boxplot_path = os.path.join(target_dir, f"boxplot_{column}_{name}.{figure_type}")
         plt.savefig(boxplot_path, bbox_inches='tight')
         plt.close()
 
