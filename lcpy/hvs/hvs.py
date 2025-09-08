@@ -479,7 +479,8 @@ def sum_scenarios_per_flow(data: dict, flows: list, scenarios: list, name: str) 
     return {name: df_result}
 
 
-def plot_stacked_percentage_bar_sub_processes(data_dict, key, filepath, figsize = (5,3), dpi = 600, top_x=5,  verbose = 'False', xlabel="Processes", ylabel="Contribution (%)"):
+def plot_stacked_percentage_bar_sub_processes(data_dict, key, filepath, label_fontsize=14, tick_fontsize=14, title_fontsize=14,
+                                              figsize = (5,3), dpi = 600, top_x=5,  verbose = 'False', ylabel="Processes", xlabel="Contribution (%)"):
     """
     Creates a stacked percentage bar chart for the given key.
 
@@ -522,10 +523,11 @@ def plot_stacked_percentage_bar_sub_processes(data_dict, key, filepath, figsize 
     for i, v in enumerate(df_final["Percentage"]):
         ax.text(v + 1, i, f"{v:.1f}%", va='center')
 
-    ax.set_xlabel(xlabel)
+    ax.set_xlabel(xlabel, fontsize=label_fontsize)
     ax.grid(False)
-    ax.set_ylabel(ylabel)
-    ax.set_title(f"{key}")
+    ax.set_ylabel(ylabel, fontsize=label_fontsize)
+    ax.tick_params(axis='both', labelsize=tick_fontsize)
+    ax.set_title(f"{key}", fontsize=title_fontsize)
     plt.savefig(filepath, bbox_inches='tight')
 
     plt.gca().invert_yaxis()  # Highest value at top
