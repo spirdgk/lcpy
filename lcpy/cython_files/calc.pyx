@@ -442,9 +442,9 @@ def lcoe_calculation_in_time(list amounts_lists, cnp.ndarray[cnp.float64_t, ndim
 
         accumulated_discounted_amount_at_year = 0
 
-        for j in range(construction_years, total_years):
+        for j in range(con_years, total_years):
 
-            discounted_amount_at_year = amounts[i,j - construction_years]*discount_rate_np[j - construction_years]
+            discounted_amount_at_year = amounts[i,j - con_years]*discount_rate_np[j - con_years]
             accumulated_discounted_amount_at_year += discounted_amount_at_year
             accumulated_discounted_amount_at_year_discounted_at_first_year = accumulated_discounted_amount_at_year*rate
             lcoe_in_time[i,j] = cumulative_costs_mv[i,j]/accumulated_discounted_amount_at_year_discounted_at_first_year
