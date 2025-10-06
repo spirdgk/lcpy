@@ -425,28 +425,36 @@ def lcoe_calculation_in_time(list amounts_lists, cnp.ndarray[cnp.float64_t, ndim
 
     cdef int scenarios = amounts_lists[0].shape[0]
     cdef int time_steps = amounts_lists[0].shape[1]
-    cdef total_years = time_steps + con_years
+    cdef int total_years = time_steps + con_years
 
     # Define output arrays with appropriate shapes and types
     cdef cnp.ndarray[cnp.float64_t, ndim=2] lcoe_in_time = np.zeros((scenarios, total_years), dtype=np.float64)
     cdef cnp.ndarray[cnp.float64_t, ndim=2] denominator = np.zeros((scenarios, total_years), dtype=np.float64)
 
     cdef int i, j, k
-    cdef cnp.ndarray[cnp.float64_t, ndim=2] amounts
-    cdef cnp.ndarray[cnp.float64_t, ndim=2] cumulative_costs_mv
+    cdef cnp.ndarray[cnp.float64_t, ndim=2] amounts = amounts_lists[0]
+    cdef cnp.ndarray[cnp.float64_t, ndim=2] cumulative_costs_mv = cumulative_costs
     cdef cnp.float64_t rate = discount_rate[con_years]
-
-    amounts = amounts_lists[0]
-    cumulative_costs_mv = cumulative_costs
+    cdef cnp.float64_t accumulated_discounted_amount_at_year = 0
+    cdef cnp.float64_t discounted_amount_at_year = 0
 
     for i in range(scenarios):
 
-        denominator[i, con_years] = amounts[i, 0] * rate
-        lcoe_in_time[i, con_years] = cumulative_costs_mv[i, con_years] / denominator[i, con_years]
+        accumulated_discounted_amount_at_year = 0
 
-        for j in range(con_years, total_years):
-            denominator[i,j] = (amounts[i,j - con_years]*discount_rate[j - con_years] + denominator[i,j-1])*rate
-            lcoe_in_time[i,j] = cumulative_costs_mv[i,j]/denominator[i,j]
+        for j in range(construction_years, total_years):
+
+            discounted_amount_at_year = amounts[i,j - construction_years]*discount_rate_np[j - construction_years]
+            accumulated_discounted_amount_at_year += discounted_amount_at_year
+            accumulated_discounted_amount_at_year_discounted_at_first_year = accumulated_discounted_amount_at_year*rate
+            lcoe_in_time[i,j] = cumulative_costs_mv[i,j]/accumulated_discounted_amount_at_year_discounted_at_first_year
+
+        # denominator[i, con_years] = amounts[i, 0] * rate
+        # lcoe_in_time[i, con_years] = cumulative_costs_mv[i, con_years] / denominator[i, con_years]
+
+        # for j in range(con_years, total_years):
+        #     denominator[i,j] = (amounts[i,j - con_years]*discount_rate[j - con_years] + denominator[i,j-1])*rate
+        #     lcoe_in_time[i,j] = cumulative_costs_mv[i,j]/denominator[i,j]
 
     return lcoe_in_time
 
