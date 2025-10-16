@@ -1,0 +1,3 @@
+# To use premise generated pLCI databases these databases can be created in a separate python environment
+# with the below premise-related dependencies installed
+premise<=2.2.6
