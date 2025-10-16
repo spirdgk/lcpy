@@ -52,10 +52,13 @@ pass the path to it and related information to the structured dictionary as desc
 If you're using the package please consider citing the following pre-print article
 Spiros Gkousis, Evina Katsou, lcpy: an open-source python package for parametric and dynamic Life Cycle Assessment and Life Cycle Costing, arXiv, June 2025, https://doi.org/10.48550/arXiv.2506.13744
 
-
 ## Requirements
 
 See requirements.txt
+
+## Compatibilty
+
+lcpy has been tested on Windows 11 using Python 3.10.
 
 ## Contributions
 
