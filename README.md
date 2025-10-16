@@ -1,8 +1,6 @@
-# LcPy
-
-# Documentation
 A detailed user documentation and guide is available here: * [General Documentation](https://github.com/spirdgk/lcpy/blob/master/General%20documentation.pdf)
 
+# LcPy
 A Python package for flexible, parametric LCA and LCC calculations. LcPy aims on enabling dynamic and advanced environmental and costing assessment for processes and systems. 
 The user is prompted to define in a structured way a process consisting of several construction and operational sub-processes. The user then associates each sub-process to the consumption of 
 inflows and production of outflows (sub-sub-processes). The user can include the amounts of inflows and outflows of each sub-process via parametric models that calculate these exchange amounts 
