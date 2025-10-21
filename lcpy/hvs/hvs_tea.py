@@ -216,6 +216,7 @@ def visualize_stacked_barchart_time_series(df, step, total_names, filepath, ylab
     # Adjust layout for better visibility
     plt.tight_layout()
     plt.savefig(filepath)
+    plt.show()
     plt.close()
 
 
