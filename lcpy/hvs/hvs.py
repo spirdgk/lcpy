@@ -338,6 +338,7 @@ def visualize_stacked_barchart_time_series_impact(impact, scen_idx, category_nam
         # Adjust layout for better visibility
         excel_file_path = os.path.join(target_dir, f'impact_stacked_bars_in_time_{category_names[cat_idx]}_{per_fu}_{name}.png')
         plt.savefig(excel_file_path)
+        plt.show()
         plt.close()
 
 
