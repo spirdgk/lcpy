@@ -157,6 +157,7 @@ def visualize_dataframes_time_series(dataframes, impacts, scenarios, xlabel, yla
             plt.savefig(f"{filepath}_{scenarios}.png")
         else:
             plt.savefig(f"{filepath}_all_scenarios.png")
+        plt.show()
         plt.close()
 
 
@@ -175,6 +176,7 @@ def visualize_npv_in_time(df_rev, df_cost, scen_names, filepath, fig_size = (5,3
     plt.legend(title="Scenarios")
     plt.tight_layout()
     plt.savefig(filepath)
+    plt.show()
     plt.close()
 
 
