@@ -44,6 +44,10 @@ LcPy is under active development and can be installed by cloning the repository 
 
 pip install git+https://github.com/spirdgk/lcpy.git
 
+In case brightway and premise are to be installed in the same environment with lcpy, this can be done at the time of installing lcpy with:
+
+pip install "lcpy[bw] @ git+https://github.com/spirdgk/lcpy.git"
+
 ## Examples
 
 Please consult the documentation and follow the examples provided to use the package. In order to use in combination with bw2 please install a bw2 environment in a separate folder and 
