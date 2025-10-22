@@ -38,6 +38,12 @@ setup(
         "seaborn",
         "xlsxwriter"
     ],
+    extras_require = {
+        "bw" = [
+            "premise[bw2]",
+            "brightway2==2.4.7"
+        ]
+    },
     python_requires=">=3.10", # python requirement
     license="BSD 3-Clause",
     zip_safe=False,
