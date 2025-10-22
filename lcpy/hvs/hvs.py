@@ -206,7 +206,7 @@ def create_and_save_dataframes_time_series(res_array, impacts, scenarios, excel_
 
 
 def plot_bar_charts_by_category(scenarios, scenarios_to_plot=None, impacts_to_plot=None, target_dir=".", figsize=(10, 5),
-                                dpi=300, per_fu='', name = "", con_years = 0):
+                                dpi=300, per_fu='', name = "", con_years = 0, y_name = "Impact", x_name ="Time"):
     """
     Plots bar charts from a dictionary of DataFrames where each key represents a scenario,
     and each DataFrame contains categories as columns and steps as rows.
@@ -240,8 +240,8 @@ def plot_bar_charts_by_category(scenarios, scenarios_to_plot=None, impacts_to_pl
             plt.figure(figsize=figsize, dpi=dpi)
             sns.barplot(x=df.index, y=df[category], color='skyblue')
 
-            plt.xlabel("Time")
-            plt.ylabel("Impact")
+            plt.xlabel(x_name)
+            plt.ylabel(y_name)
 
             # Save the figure
             filename = f"{key}_barplot_{category}_{name}_{per_fu}.png"
