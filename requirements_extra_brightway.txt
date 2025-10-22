@@ -2,9 +2,3 @@
 # dependencies need to be installed in a separate python environment, the path to which needs to be given
 # to the relevant calculator class via a dictionary with predefined structure (see examples)
 brightway2==2.4.7
-bw-migrations==0.2
-bw2analyzer==0.10
-bw2calc==1.8.2
-bw2data==3.6.6
-bw2io==0.8.12
-bw2parameters==1.1.0
