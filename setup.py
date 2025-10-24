@@ -40,7 +40,7 @@ setup(
     ],
     extras_require = {
         "bw": [
-            "premise[bw2]",
+            "premise[bw2]==2.2.6",
             "brightway2==2.4.7",
         ],
     },
