@@ -43,7 +43,7 @@ def plot_stacked_percentage_barchart_seaborn(df, filepath, figsize, dpi,
                                              label_size = 14,
                                              tick_size = 14,
                                              legend_size = 12,
-                                             verbose = 'True', tab = "tab10", 
+                                             verbose = False, tab = "tab10", 
                                              xlabel="Categories", ylabel="Contribution (%)"):
     """
     Plots a stacked percentage bar chart using Seaborn where each column sums to 100%.
@@ -481,7 +481,7 @@ def sum_scenarios_per_flow(data: dict, flows: list, scenarios: list, name: str) 
 
 
 def plot_stacked_percentage_bar_sub_processes(data_dict, key, filepath, label_fontsize=14, tick_fontsize=14, title_fontsize=14,
-                                              figsize = (5,3), dpi = 600, top_x=5,  verbose = 'False', ylabel="Processes", xlabel="Contribution (%)"):
+                                              figsize = (5,3), dpi = 600, top_x=5,  verbose = False, ylabel="Processes", xlabel="Contribution (%)"):
     """
     Creates a stacked percentage bar chart for the given key.
 
