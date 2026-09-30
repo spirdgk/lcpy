@@ -53,8 +53,8 @@ pip install "lcpy[bw] @ git+https://github.com/spirdgk/lcpy.git"
 Please consult the documentation and follow the examples provided to use the package. In order to use in combination with bw2 please install a bw2 environment in a separate folder and 
 pass the path to it and related information to the structured dictionary as described in the examples.
 
-If you're using the package please consider citing the following pre-print article
-Spiros Gkousis, Evina Katsou, lcpy: an open-source python package for parametric and dynamic Life Cycle Assessment and Life Cycle Costing, arXiv, June 2025, https://doi.org/10.48550/arXiv.2506.13744
+If you're using the package please consider citing the following article
+Spiros Gkousis, Evina Katsou, Lcpy: An open-source python package for parametric and dynamic life cycle assessment and life cycle costing analysis, Software Impacts, Volume 27, 2026, 100805, ISSN 2665-9638, https://doi.org/10.1016/j.simpa.2025.100805.
 
 ## Requirements
 
